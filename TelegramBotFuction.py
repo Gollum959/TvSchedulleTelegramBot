@@ -4,9 +4,13 @@ import os
 import shutil
 import docx
 import telebot
+import ScheduleDocument
+
+
 
 
 today = pendulum.today()
+
 
 list_dir = os.listdir(path="E:\Work\Python\Project\Test Directory")
 this_week_local_file_name = "E:\Work\Python\Project\Test Right Directory\\thisweek.docx"
@@ -90,65 +94,32 @@ if next_weak_sourse_file_path:
 else:
     print(f'Sourse file for next week isn`t found')
 
-def print_paragraps(text_in_cells):
-    result = ''
-    for date_cell_text in text_in_cells:
-        if re.findall(r"\w", date_cell_text.text):
-            result += remove_strike_text(date_cell_text)+' '
-    return result
 
-def remove_strike_text(paragraph):
-    lst = paragraph.runs
-    small = filter(lambda x: not x.font.strike, lst)
-    result = ''
-    for item in list(small):
-        result += item.text
-    if result:
-        return result+'\n'
-    else:
-        return result
-
-
-def show_day_timetable_pts(week_local_file_name, day_of_week, name_equipment):
-    doc = docx.Document(week_local_file_name)
-    tables = doc.tables
-    result = print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[day_of_week].cells[0].paragraphs)
-    result += '_______________\n'
-    work_schedule = print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[day_of_week].cells[List_PTS_and_hardware[name_equipment][1]].paragraphs)
-    if work_schedule.strip():
-        result += work_schedule
-    else:
-        result += 'Работ нет'
-    return result
-
-def show_week_timetable_pts(week_local_file_name, name_equipment):
-    doc = docx.Document(week_local_file_name)
-    tables = doc.tables
-    result = ''
-    for i in range(1, 8):
-        result += print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[i].cells[0].paragraphs)
-        result += ('__________\n')
-        work_schedule = print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[i].cells[List_PTS_and_hardware[name_equipment][1]].paragraphs)
-        if work_schedule.strip().startswith('Изм.'):
-            result += 'Работ нет\n'
-        elif work_schedule.strip():
-            result += work_schedule
-        else:
-            result += 'Работ нет\n'
-        result += ('__________\n')
-    return result
+#def show_week_timetable_pts(week_local_file_name, name_equipment):
+#    doc = docx.Document(week_local_file_name)
+#    tables = doc.tables
+#    result = ''
+#    for i in range(1, 8):
+#        result += print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[i].cells[0].paragraphs)
+#        result += ('__________\n')
+#        work_schedule = print_paragraps(tables[List_PTS_and_hardware[name_equipment][0]].rows[i].cells[List_PTS_and_hardware[name_equipment][1]].paragraphs)
+#        if work_schedule.strip().startswith('Изм.'):
+#            result += 'Работ нет\n'
+#        elif work_schedule.strip():
+#            result += work_schedule
+#        else:
+#            result += 'Работ нет\n'
+#        result += ('__________\n')
+#    return result
 
 
-doc = docx.Document(this_week_local_file_name)
-List_PTS_and_hardware = {}
-for index_and_table in enumerate(doc.tables):
-    number_of_colums = len(index_and_table[1].rows[0].cells)
-    print (number_of_colums)
-    for number in range(1, number_of_colums):
-        name_equipment = index_and_table[1].rows[0].cells[number].text.strip()
-        List_PTS_and_hardware[name_equipment] = [index_and_table[0], number]
+doc_this_week = ScheduleDocument.ScheduleDocument(this_week_local_file_name)
+doc_this_week.parse_document()
+list_pts_and_hardware_this_week = doc_this_week.map_pts_and_hardware
 
-print(List_PTS_and_hardware)
+doc_next_week = ScheduleDocument.ScheduleDocument(next_week_local_file_name)
+doc_next_week.parse_document()
+list_pts_and_hardware_next_week = doc_next_week.map_pts_and_hardware
 
 
 token = '2133524927:AAGL7Quqshq3OaLmfmFwTpSqaqWj25g2p0g'
@@ -157,7 +128,7 @@ bot = telebot.TeleBot(token)
 @bot.message_handler(commands=['start'])
 def handle_text(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    for name_hardware in List_PTS_and_hardware:
+    for name_hardware in list_pts_and_hardware_this_week:
         user_markup.row(name_hardware)
     bot.send_message(message.from_user.id, 'Добро пожаловать в бот по получению расписания ПТС!\n Выберите Пункт МЕНЮ', reply_markup=user_markup)
 
@@ -180,14 +151,14 @@ def show_day_timetable(call):
     name_pts = splited_submenu[2]
     type_schedule = int(splited_submenu[1])
     if type_schedule == 1:
-        result = show_day_timetable_pts(this_week_local_file_name, today.day_of_week, name_pts)
+        result = doc_this_week.show_day_timetable_pts(name_pts)
         bot.send_message(call.from_user.id, result)
-    elif type_schedule == 2:
-        result = show_week_timetable_pts(this_week_local_file_name, name_pts)
-        bot.send_message(call.from_user.id, result)
-    elif type_schedule == 3:
-        result = show_week_timetable_pts(next_week_local_file_name, name_pts)
-        bot.send_message(call.from_user.id, result)
+#    elif type_schedule == 2:
+#        result = doc_this_week.show_week_timetable_pts(name_pts)
+#        bot.send_message(call.from_user.id, result)
+#    elif type_schedule == 3:
+#        result = doc_this_week.show_week_timetable_pts(name_pts)
+#        bot.send_message(call.from_user.id, result)
 
 bot.polling(none_stop=True)
 
