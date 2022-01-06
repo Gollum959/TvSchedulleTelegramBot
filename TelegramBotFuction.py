@@ -4,12 +4,15 @@ import os
 import shutil
 import telebot
 import ScheduleDocument
+#import Chekandcopy
+
 
 today = pendulum.today()
 
-list_dir = os.listdir(path="E:\Work\Python\Project\Test Directory")
-this_week_local_file_name = "E:\Work\Python\Project\Test Right Directory\\thisweek.docx"
-next_week_local_file_name = "E:\Work\Python\Project\Test Right Directory\\nextweek.docx"
+list_dir = os.listdir(path="E:\\Work\\Python\\Project\\Test Directory")
+work_dir = "E:\\Work\\Python\\Project\\Test Right Directory"
+this_week_local_file_name = "E:\\Work\\Python\\Project\\Test Right Directory\\thisweek.docx"
+next_week_local_file_name = "E:\\Work\\Python\\Project\\Test Right Directory\\nextweek.docx"
 
 current_week_start = today.start_of('week')
 current_week_end = today.end_of('week')
@@ -46,7 +49,7 @@ def file_path(week_start, week_end):
     if path_file:
         list_file = os.listdir(path=path_file)
         for file in list_file:
-            match_file = re.findall(r"(p|р)(т|t)(s)\w*(.doc|.docx|rtf)$", file, re.IGNORECASE)
+            match_file = re.findall(r"(p|р)(т|t)(s)[\w \W]*(.doc|.docx|rtf)$", file, re.IGNORECASE)
             if match_file:
                 return f'{path_file}\{file}'
     return ''
@@ -65,7 +68,7 @@ def chek_and_copy(file_path, local_file, text):
     if sourse_file_size == local_file_size:
         print(f'File {text} is already exist')
     else:
-        shutil.copyfile(file_path, local_file, follow_symlinks=True)
+        shutil.copy(file_path, local_file, follow_symlinks=True)
         print(f'File {text} is copied')
 
 
@@ -80,12 +83,12 @@ this_weak_sourse_file_path = file_path(current_week_start, current_week_end)
 next_weak_sourse_file_path = file_path(next_week_start, next_week_end)
 
 if this_weak_sourse_file_path:
-    chek_file_exist(this_weak_sourse_file_path, this_week_local_file_name, 'for this week')
+    chek_file_exist(this_weak_sourse_file_path, work_dir, 'for this week')
 else:
     print(f'Sourse file for this week isn`t found')
 
 if next_weak_sourse_file_path:
-    chek_file_exist(next_weak_sourse_file_path, next_week_local_file_name, 'for next week')
+    chek_file_exist(next_weak_sourse_file_path, work_dir, 'for next week')
 else:
     print(f'Sourse file for next week isn`t found')
 
