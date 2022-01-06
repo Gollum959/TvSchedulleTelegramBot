@@ -25,9 +25,8 @@ class ScheduleDocumentTables:
         return self.map_pts_and_hardware[name_equipment][1]
 
     def show_day_timetable_pts(self, name_equipment):
-
         result = self.print_paragraps(self
-                                      .tables[self.get_column_num(name_equipment)]
+                                      .tables[self.get_table_num(name_equipment)]
                                       .rows[ScheduleDocumentTables.day_of_week]
                                       .cells[0]
                                       .paragraphs)
@@ -41,14 +40,19 @@ class ScheduleDocumentTables:
         return result
 
     def show_week_timetable_pts(self, name_equipment):
-
-        table_num = self.map_pts_and_hardware[name_equipment][0]
-        colum_num = self.map_pts_and_hardware[name_equipment][1]
         result = ''
         for i in range(1, 8):
-            result += self.print_paragraps(self.tables[table_num].rows[i].cells[0].paragraphs)
+            result += self.print_paragraps(self
+                                           .tables[self.get_table_num(name_equipment)]
+                                           .rows[i]
+                                           .cells[0]
+                                           .paragraphs)
             result += ('__________\n')
-            work_schedule = self.print_paragraps(self.tables[table_num].rows[i].cells[colum_num].paragraphs)
+            work_schedule = self.print_paragraps(self
+                                                 .tables[self.get_table_num(name_equipment)]
+                                                 .rows[i]
+                                                 .cells[self.get_column_num(name_equipment)]
+                                                 .paragraphs)
             if work_schedule.strip().startswith('Изм.'):
                 result += 'Работ нет\n'
             elif work_schedule.strip():

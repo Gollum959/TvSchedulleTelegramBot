@@ -125,13 +125,13 @@ def show_day_timetable(call):
     name_pts = splited_submenu[2]
     type_schedule = int(splited_submenu[1])
     if type_schedule == 1:
-        result = doc_this_week.show_day_timetable_pts(name_pts)
+        result = doc_this_week.get_day_timetable_pts(name_pts)
         bot.send_message(call.from_user.id, result)
     elif type_schedule == 2:
-        result = doc_this_week.show_week_timetable_pts(name_pts)
+        result = doc_this_week.get_week_timetable_pts(name_pts)
         bot.send_message(call.from_user.id, result)
     elif type_schedule == 3:
-        result = doc_next_week.show_week_timetable_pts(name_pts)
+        result = doc_next_week.get_week_timetable_pts(name_pts)
         bot.send_message(call.from_user.id, result)
 
 bot.polling(none_stop=True)
