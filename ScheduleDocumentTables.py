@@ -3,7 +3,6 @@ import re
 
 
 class ScheduleDocumentTables:
-
     today = pendulum.today()
     day_of_week = 7 if today.day_of_week == 0 else today.day_of_week
 
@@ -25,34 +24,34 @@ class ScheduleDocumentTables:
         return self.map_pts_and_hardware[name_equipment][1]
 
     def show_day_timetable_pts(self, name_equipment):
-        result = self.print_paragraps(self
-                                      .tables[self.get_table_num(name_equipment)]
-                                      .rows[ScheduleDocumentTables.day_of_week]
-                                      .cells[0]
-                                      .paragraphs)
+        result = self.__print_paragraphs(self
+                                         .tables[self.get_table_num(name_equipment)]
+                                         .rows[ScheduleDocumentTables.day_of_week]
+                                         .cells[0]
+                                         .paragraphs)
         result += '_______________\n'
-        work_schedule = self.print_paragraps(self
-                                             .tables[self.get_table_num(name_equipment)]
-                                             .rows[ScheduleDocumentTables.day_of_week]
-                                             .cells[self.get_column_num(name_equipment)]
-                                             .paragraphs)
+        work_schedule = self.__print_paragraphs(self
+                                                .tables[self.get_table_num(name_equipment)]
+                                                .rows[ScheduleDocumentTables.day_of_week]
+                                                .cells[self.get_column_num(name_equipment)]
+                                                .paragraphs)
         result += work_schedule if work_schedule.strip() else 'Работ нет'
         return result
 
     def show_week_timetable_pts(self, name_equipment):
         result = ''
         for i in range(1, 8):
-            result += self.print_paragraps(self
-                                           .tables[self.get_table_num(name_equipment)]
-                                           .rows[i]
-                                           .cells[0]
-                                           .paragraphs)
+            result += self.__print_paragraphs(self
+                                              .tables[self.get_table_num(name_equipment)]
+                                              .rows[i]
+                                              .cells[0]
+                                              .paragraphs)
             result += ('__________\n')
-            work_schedule = self.print_paragraps(self
-                                                 .tables[self.get_table_num(name_equipment)]
-                                                 .rows[i]
-                                                 .cells[self.get_column_num(name_equipment)]
-                                                 .paragraphs)
+            work_schedule = self.__print_paragraphs(self
+                                                    .tables[self.get_table_num(name_equipment)]
+                                                    .rows[i]
+                                                    .cells[self.get_column_num(name_equipment)]
+                                                    .paragraphs)
             if work_schedule.strip().startswith('Изм.'):
                 result += 'Работ нет\n'
             elif work_schedule.strip():
@@ -63,7 +62,7 @@ class ScheduleDocumentTables:
         return result
 
     @staticmethod
-    def remove_strike_text(paragraph):
+    def __remove_strike_text(paragraph):
         lst = paragraph.runs
         not_strike = filter(lambda x: not x.font.strike, lst)
         result = ''
@@ -73,11 +72,9 @@ class ScheduleDocumentTables:
         return result
 
     @staticmethod
-    def print_paragraps(text_in_cells):
+    def __print_paragraphs(text_in_cells):
         result = ''
         for date_cell_text in text_in_cells:
             if re.findall(r"\w", date_cell_text.text):
-                result += ScheduleDocumentTables.remove_strike_text(date_cell_text) + ' '
+                result += ScheduleDocumentTables.__remove_strike_text(date_cell_text) + ' '
         return result
-
-

@@ -4,15 +4,17 @@ import os
 import shutil
 import telebot
 import ScheduleDocument
+import win32com.client as win32
+from win32com.client import constants
 #import Chekandcopy
 
 
 today = pendulum.today()
 
 list_dir = os.listdir(path="E:\\Work\\Python\\Project\\Test Directory")
-work_dir = "E:\\Work\\Python\\Project\\Test Right Directory"
-this_week_local_file_name = "E:\\Work\\Python\\Project\\Test Right Directory\\thisweek.docx"
-next_week_local_file_name = "E:\\Work\\Python\\Project\\Test Right Directory\\nextweek.docx"
+work_dir = "E:\\Work\\Python\\Project\\Test Right Directory\\"
+this_week_local_file_name = "thisweek"
+next_week_local_file_name = "nextweek"
 
 current_week_start = today.start_of('week')
 current_week_end = today.end_of('week')
@@ -55,48 +57,71 @@ def file_path(week_start, week_end):
     return ''
 
 
-def chek_and_copy(file_path, local_file, text):
-    sourse_file_info = os.stat(file_path)
-    sourse_file_size = sourse_file_info.st_size
+def chek_and_copy(path_to_file, local_file, text):
+    extension = '.docx' if path_to_file.endswith('.docx') else ('.doc' if path_to_file.endswith('.doc') else '')
+    source_file_info = os.stat(path_to_file)
+    source_file_size = source_file_info.st_size
+    local_file_path = work_dir+local_file+extension
 
-    if os.path.isfile(local_file):
-        local_file_info = os.stat(local_file)
+    if os.path.isfile(local_file_path):
+        local_file_info = os.stat(local_file_path)
         local_file_size = local_file_info.st_size
     else:
         local_file_size = 0
 
-    if sourse_file_size == local_file_size:
+    if source_file_size == local_file_size:
         print(f'File {text} is already exist')
     else:
-        shutil.copy(file_path, local_file, follow_symlinks=True)
+        shutil.copyfile(path_to_file, local_file_path, follow_symlinks=True)
         print(f'File {text} is copied')
+        if extension == '.doc':
+            save_as_docx(local_file_path, local_file)
+            print(f'File {text} is converted')
 
 
-def chek_file_exist(soure_file_path, local_file_path, text):
-    if os.path.isfile(soure_file_path):
-        chek_and_copy(soure_file_path, local_file_path, text)
+
+
+def save_as_docx(path, file_name):
+    # Opening MS Word
+    word = win32.gencache.EnsureDispatch('Word.Application')
+    doc = word.Documents.Open(path)
+    doc.Activate ()
+
+    # Rename path with .docx
+    new_file_abs = work_dir+file_name+'.docx'
+
+    # Save and Close
+    word.ActiveDocument.SaveAs(
+        new_file_abs, FileFormat=constants.wdFormatXMLDocument
+    )
+    doc.Close(False)
+
+
+def chek_file_exist(source_file_path, local_file_name, text):
+    if os.path.isfile(source_file_path):
+        chek_and_copy(source_file_path, local_file_name, text)
     else:
-        print(f'Sourse file {text} isn`t found')
+        print(f'Source file {text} isn`t found')
 
 
-this_weak_sourse_file_path = file_path(current_week_start, current_week_end)
-next_weak_sourse_file_path = file_path(next_week_start, next_week_end)
+this_weak_source_file_path = file_path(current_week_start, current_week_end)
+next_weak_source_file_path = file_path(next_week_start, next_week_end)
 
-if this_weak_sourse_file_path:
-    chek_file_exist(this_weak_sourse_file_path, work_dir, 'for this week')
+if this_weak_source_file_path:
+    chek_file_exist(this_weak_source_file_path, this_week_local_file_name, 'for this week')
 else:
-    print(f'Sourse file for this week isn`t found')
+    print(f'Source file for this week isn`t found')
 
-if next_weak_sourse_file_path:
-    chek_file_exist(next_weak_sourse_file_path, work_dir, 'for next week')
+if next_weak_source_file_path:
+    chek_file_exist(next_weak_source_file_path, next_week_local_file_name, 'for next week')
 else:
-    print(f'Sourse file for next week isn`t found')
+    print(f'Source file for next week isn`t found')
 
-doc_this_week = ScheduleDocument.ScheduleDocument(this_week_local_file_name)
+doc_this_week = ScheduleDocument.ScheduleDocument(work_dir+this_week_local_file_name+'.docx')
 doc_this_week.init()
 list_pts_and_hardware_this_week = doc_this_week.get_map()
 
-doc_next_week = ScheduleDocument.ScheduleDocument(next_week_local_file_name)
+doc_next_week = ScheduleDocument.ScheduleDocument(work_dir+next_week_local_file_name+'.docx')
 doc_next_week.init()
 #list_pts_and_hardware_next_week = doc_next_week.map_pts_and_hardware
 
