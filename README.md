@@ -9,6 +9,7 @@ This project has two modules. The first checks for the presence or change of the
 
 Project is created with:
 * Python 3.7
+* pyTelegramBotAPI
 * Pywin32
 * Shutil
 * Pendulum
