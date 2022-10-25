@@ -1,8 +1,10 @@
-import pendulum
 import re
+import pendulum
 
 
 class ScheduleDocumentTables:
+    """Class works with a special table with a work schedule."""
+
     today = pendulum.today()
     day_of_week = 7 if today.day_of_week == 0 else today.day_of_week
 

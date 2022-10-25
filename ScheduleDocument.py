@@ -1,7 +1,10 @@
 import docx
-import ScheduleDocumentTables
 
-class ScheduleDocument:
+from ScheduleDocumentTables import ScheduleDocumentTables
+
+
+class ScheduleDocument:         
+    """Creates answers from docx table."""
 
     def __init__(self, path_to_file):
         self.path_to_file = path_to_file
@@ -10,7 +13,7 @@ class ScheduleDocument:
 
     def init(self):
         self.__doc = docx.Document(self.path_to_file)
-        self.__tables = ScheduleDocumentTables.ScheduleDocumentTables(self.__doc.tables)
+        self.__tables = ScheduleDocumentTables(self.__doc.tables)
         self.__tables.init()
 
     def get_map(self):
@@ -21,4 +24,3 @@ class ScheduleDocument:
 
     def get_week_timetable_pts(self, name_equipment):
         return self.__tables.show_week_timetable_pts(name_equipment)
-
